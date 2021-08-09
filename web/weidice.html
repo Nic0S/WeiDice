@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WeiDice Frontend</title>
+    <script language="javascript" type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script language="javascript" type="text/javascript" src="weidice_abi.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+
+<body>
+<label for="contract"> Contract Address:</label>
+<input type="text" id="contract">
+<div>
+    <button onclick="connect()">Connect</button>
+</div>
+<p></p>
+<div><label for="status">Status: </label>
+    <p id="status"></p></div>
+
+<p></p>
+<div><label for="userBalance">User balance: </label>
+    <p id="userBalance"></p></div>
+
+<label for="wager"> Wager (ETH):</label>
+<input type="number" id="wager" value="0.001">
+<p></p>
+<div>
+    <button onclick="roll()">Roll!</button>
+</div>
+<p></p>
+<div><label for="contractBalance">Contract balance: </label>
+    <p id="contractBalance"></p></div>
+<script>
+  let contract;
+  let account;
+  let web3;
+
+  function startApp() {
+    const params = new URLSearchParams(window.location.search);
+    $("#contract").val(params.get('contract'))
+  }
+
+  async function connect() {
+    status("Connecting...")
+    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+    account = accounts[0]
+
+    const bal = await web3.eth.getBalance(account)
+    $("#userBalance").text(web3.utils.fromWei(bal.toString()) + " ETH");
+
+    contract = $("#contract").val();
+    const cBal = await web3.eth.getBalance(contract)
+    $("#contractBalance").text(web3.utils.fromWei(cBal.toString()) + " ETH");
+
+    status("Connected.")
+  }
+
+  function roll() {
+    status("Sending roll transaction...")
+  }
+
+  function status(message) {
+    $("#status").text(message);
+  }
+
+  window.addEventListener('load', function () {
+    status("Starting...");
+    if (typeof window.ethereum !== 'undefined') {
+      web3 = new Web3(window.ethereum)
+      startApp()
+    } else {
+      status("Please make sure metamask is installed and refresh the page.")
+    }
+  })
+</script>
+<script>
+</script>
+</body>
+</html>
