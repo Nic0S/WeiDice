@@ -14,7 +14,7 @@
 <label for="contract"> Contract Address:</label>
 <input type="text" id="contract">
 <div>
-    <button onclick="connect()">Connect</button>
+    <button onclick="connectAndReload().then(() => status('Connected.'))">Connect</button>
 </div>
 <p></p>
 <div><label for="status">Status: </label>
@@ -33,18 +33,21 @@
 <p></p>
 <div><label for="contractBalance">Contract balance: </label>
     <p id="contractBalance"></p></div>
+<div><label for="events">Events: </label>
+    <div id="events"></div></div>
 <script>
   let contract;
   let account;
   let web3;
+  let weiDice;
 
   function startApp() {
     const params = new URLSearchParams(window.location.search);
     $("#contract").val(params.get('contract'))
+    status("Please click \"Connect\" to get started.")
   }
 
-  async function connect() {
-    status("Connecting...")
+  async function connectAndReload() {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
     account = accounts[0]
 
@@ -55,11 +58,46 @@
     const cBal = await web3.eth.getBalance(contract)
     $("#contractBalance").text(web3.utils.fromWei(cBal.toString()) + " ETH");
 
-    status("Connected.")
+    weiDice = new web3.eth.Contract(weiDiceABI, contract);
+
+    let opts = {
+      filter: {
+        roller: account,
+      },
+      fromBlock: 0,
+      toBlock: 'latest',
+    }
+    weiDice.getPastEvents("Rolled", opts)
+        .then(e => events(e))
+        .catch(err => status(err))
   }
 
   function roll() {
     status("Sending roll transaction...")
+    value = $("#wager").val()
+    weiDice.methods.roll()
+        .send({from: account, value: web3.utils.toWei(value.toString(), "ether")})
+        .on("receipt", (receipt) => {
+          status("Transaction sent! Results will appear below")
+        })
+        .on("error", (error) => {
+          status(error.message)
+          console.log(error)
+        })
+  }
+
+  function events(events) {
+    events.forEach(e => {
+      let eStr = "Block: " + e.blockNumber
+      if (e.returnValues.won) {
+        eStr += " Winnings: " + web3.utils.fromWei(e.returnValues.wonAmount.toString())
+      } else {
+        eStr += " Lost"
+      }
+      var entry = document.createElement("p");
+      entry.appendChild(document.createTextNode(eStr))
+      $("#events").prepend(entry)
+    })
   }
 
   function status(message) {
