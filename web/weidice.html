@@ -19,22 +19,24 @@
 <p></p>
 <div><label for="status">Status: </label>
     <p id="status"></p></div>
-
 <p></p>
-<div><label for="userBalance">User balance: </label>
-    <p id="userBalance"></p></div>
 
-<label for="wager"> Wager (ETH):</label>
-<input type="number" id="wager" value="0.001">
-<p></p>
-<div>
-    <button onclick="roll()">Roll!</button>
+<div id="loggedIn" hidden>
+    <div><label for="userBalance">User balance: </label>
+        <p id="userBalance"></p></div>
+
+    <label for="wager"> Wager (ETH):</label>
+    <input type="number" id="wager" value="0.001">
+    <p></p>
+    <div>
+        <button onclick="roll()">Roll!</button>
+    </div>
+    <p></p>
+    <div><label for="contractBalance">Contract balance: </label>
+        <p id="contractBalance"></p></div>
+    <div><label for="events">Events: </label>
+        <div id="events"></div></div>
 </div>
-<p></p>
-<div><label for="contractBalance">Contract balance: </label>
-    <p id="contractBalance"></p></div>
-<div><label for="events">Events: </label>
-    <div id="events"></div></div>
 <script>
   let contract;
   let account;
@@ -70,6 +72,18 @@
     weiDice.getPastEvents("Rolled", opts)
         .then(e => events(e))
         .catch(err => status(err))
+
+    clearInterval()
+    setInterval(async function () {
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      if (accounts[0] !== account) {
+        account = accounts[0];
+        console.log("new account: " + account);
+        await connectAndReload()
+      }
+    }, 500);
+
+    $("#loggedIn").removeAttr("hidden")
   }
 
   function roll() {
@@ -87,6 +101,7 @@
   }
 
   function events(events) {
+    $("#events").empty()
     events.forEach(e => {
       let eStr = "Block: " + e.blockNumber
       if (e.returnValues.won) {
