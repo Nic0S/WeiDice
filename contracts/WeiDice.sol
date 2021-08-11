@@ -13,7 +13,7 @@ contract WeiDice is Admin {
 
     function roll() external payable {
         require(msg.value > 0, "Cannot wager zero ETH");
-        require(msg.value <= address(this).balance,
+        require(msg.value * 2 <= address(this).balance,
             "Wager amount too high, balance too low for payout");
 
         uint rand = randMod(100);
