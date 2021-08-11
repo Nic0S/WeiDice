@@ -16,6 +16,12 @@ var weiDiceABI = [
       },
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "roll",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
         "internalType": "bool",
         "name": "won",
         "type": "bool"

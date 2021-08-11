@@ -9,7 +9,7 @@ contract WeiDice is Admin {
 
     constructor() Admin() public {}
 
-    event Rolled(address indexed roller, bool won, uint wonAmount);
+    event Rolled(address indexed roller, uint roll, bool won, uint wonAmount);
 
     function roll() external payable {
         require(msg.value > 0, "Cannot wager zero ETH");
@@ -21,9 +21,9 @@ contract WeiDice is Admin {
             uint winnings = msg.value * 2;
             bool sent = msg.sender.send(winnings);
             require(sent, "Failed to send winnings");
-            emit Rolled(msg.sender, true, winnings);
+            emit Rolled(msg.sender, rand, true, winnings);
         } else {
-            emit Rolled(msg.sender, false, 0);
+            emit Rolled(msg.sender, rand, false, 0);
         }
     }
 
