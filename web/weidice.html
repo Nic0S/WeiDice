@@ -35,7 +35,8 @@
     <div><label for="contractBalance">Contract balance: </label>
         <p id="contractBalance"></p></div>
     <div><label for="events">Events: </label>
-        <div id="events"></div></div>
+        <div id="events"></div>
+    </div>
 </div>
 <script>
   let contract;
@@ -50,7 +51,7 @@
   }
 
   async function connectAndReload() {
-    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+    const accounts = await ethereum.request({method: 'eth_requestAccounts'});
     account = accounts[0]
 
     const bal = await web3.eth.getBalance(account)
@@ -67,21 +68,19 @@
         roller: account,
       },
       fromBlock: 0,
-      toBlock: 'latest',
     }
-    weiDice.getPastEvents("Rolled", opts)
-        .then(e => events(e))
-        .catch(err => status(err))
+    weiDice.events.Rolled(opts)
+      .on('data', e => event(e))
 
     clearInterval()
     setInterval(async function () {
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await ethereum.request({method: 'eth_requestAccounts'});
       if (accounts[0] !== account) {
         account = accounts[0];
-        console.log("new account: " + account);
         await connectAndReload()
       }
     }, 500);
+
 
     $("#loggedIn").removeAttr("hidden")
   }
@@ -90,29 +89,26 @@
     status("Sending roll transaction...")
     value = $("#wager").val()
     weiDice.methods.roll()
-        .send({from: account, value: web3.utils.toWei(value.toString(), "ether")})
-        .on("receipt", (receipt) => {
-          status("Transaction sent! Results will appear below")
-        })
-        .on("error", (error) => {
-          status(error.message)
-          console.log(error)
-        })
+      .send({from: account, value: web3.utils.toWei(value.toString(), "ether")})
+      .on("receipt", (receipt) => {
+        status("Transaction sent! Results will appear below")
+      })
+      .on("error", (error) => {
+        status(error.message)
+        console.log(error)
+      })
   }
 
-  function events(events) {
-    $("#events").empty()
-    events.forEach(e => {
-      let eStr = "Block: " + e.blockNumber
-      if (e.returnValues.won) {
-        eStr += " Winnings: " + web3.utils.fromWei(e.returnValues.wonAmount.toString())
-      } else {
-        eStr += " Lost"
-      }
-      var entry = document.createElement("p");
-      entry.appendChild(document.createTextNode(eStr))
-      $("#events").prepend(entry)
-    })
+  function event(e) {
+    let eStr = "Block: " + e.blockNumber
+    if (e.returnValues.won) {
+      eStr += " Winnings: " + web3.utils.fromWei(e.returnValues.wonAmount.toString())
+    } else {
+      eStr += " Lost"
+    }
+    var entry = document.createElement("p");
+    entry.appendChild(document.createTextNode(eStr))
+    $("#events").prepend(entry)
   }
 
   function status(message) {
