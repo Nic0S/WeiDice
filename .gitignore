@@ -3,3 +3,8 @@ build/**
 
 # Truffle configuration
 truffle-config.js
+
+# Node stuff (only used for contract deployment)
+node_modules/**
+package.json
+package-lock.json
