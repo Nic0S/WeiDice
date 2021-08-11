@@ -43,6 +43,7 @@
   let account;
   let web3;
   let weiDice;
+  let eventSub;
 
   function startApp() {
     const params = new URLSearchParams(window.location.search);
@@ -70,7 +71,10 @@
       fromBlock: 0,
     }
     $("#events").empty();
-    weiDice.events.Rolled(opts).on('data', e => event(e))
+    if (eventSub) {
+      await eventSub.unsubscribe()
+    }
+    eventSub = weiDice.events.Rolled(opts).on('data', e => event(e))
 
     clearInterval()
     setInterval(async function () {
@@ -100,11 +104,11 @@
   }
 
   function event(e) {
-    let eStr = "Block " + e.blockNumber + ", you rolled a " + e.returnValues.roll;
+    let eStr = "Block " + e.blockNumber + ", you rolled a " + e.returnValues.roll + ".";
     if (e.returnValues.won) {
       eStr += " Winnings: " + web3.utils.fromWei(e.returnValues.wonAmount.toString())
     } else {
-      eStr += " Lost"
+      eStr += " Sorry, try again!"
     }
     var entry = document.createElement("p");
     entry.appendChild(document.createTextNode(eStr))
