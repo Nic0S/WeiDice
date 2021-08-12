@@ -17,7 +17,7 @@ contract("WeiDice", (accounts) => {
     expect(roll.receipt.status).to.equal(true);
     const state = await contract.getState.call({from: bob});
     expect(state.active).to.equal(true);
-    expect(state.blocksRemaining).to.equal(blockDelay);
+    expect(state.blocksRemaining.toNumber()).to.equal(blockDelay);
 
     // Must wait for blockDelay blocks
     await utils.shouldThrow(contract.getResult({from: bob}))

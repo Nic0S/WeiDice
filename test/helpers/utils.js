@@ -20,7 +20,7 @@ function mine(blocks) {
       method: 'evm_mine',
       params: [],
       id: new Date().getTime()
-    })
+    }, () => {})
   }
 }
 
