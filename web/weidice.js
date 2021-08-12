@@ -36,6 +36,7 @@ async function connectAndReload() {
       account = accounts[0];
       await connectAndReload()
     }
+    await refreshRollStatus()
   }, 500);
 
 
@@ -48,7 +49,42 @@ function roll() {
   weiDice.methods.roll()
     .send({from: account, value: web3.utils.toWei(value.toString(), "ether")})
     .on("receipt", (receipt) => {
-      status("Transaction sent! Results will appear below")
+      status("Transaction sent! Waiting for result...")
+    })
+    .on("error", (error) => {
+      status(error.message)
+      console.log(error)
+    })
+}
+
+async function refreshRollStatus() {
+  weiDice.methods.getState().call({from: account})
+    .then((status) => {
+      if (status.active) {
+        $("#getResult").removeAttr("hidden")
+        $("#roll").attr("disabled", true)
+        if (parseInt(status.blocksRemaining) === 0) {
+          $("#currentRoll").text("Ready to get result!")
+          $("#getResult").removeAttr("disabled")
+        } else {
+          $("#currentRoll").text("Roll in progress, " + status.blocksRemaining + " blocks remaining.")
+          $("#getResult").attr("disabled", true)
+        }
+      } else {
+        $("#roll").removeAttr("disabled")
+        $("#currentRoll").text("No roll in progress.")
+        $("#getResult").attr("hidden", true)
+      }
+    })
+}
+
+function getResult() {
+  status("Getting roll result...")
+  value = $("#wager").val()
+  weiDice.methods.getResult()
+    .send({from: account})
+    .on("receipt", (receipt) => {
+      status("Result transaction sent! Results will appear below under \"Events\".")
     })
     .on("error", (error) => {
       status(error.message)

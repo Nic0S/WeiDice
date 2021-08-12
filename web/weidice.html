@@ -30,8 +30,12 @@
     <input type="number" id="wager" value="0.001">
     <p></p>
     <div>
-        <button onclick="roll()">Roll!</button>
+        <button id="roll" onclick="roll()">Roll!</button>
     </div>
+    <p></p>
+    <div id="currentRoll">No roll in progress.
+    </div>
+    <button id="getResult" onclick="getResult()" hidden>Get Result</button>
     <p></p>
     <div><label for="contractBalance">Contract balance: </label>
         <p id="contractBalance"></p></div>

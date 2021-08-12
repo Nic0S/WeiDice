@@ -83,5 +83,34 @@ var weiDiceABI = [
     "payable": true,
     "stateMutability": "payable",
     "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "getResult",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getState",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blocksRemaining",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   }
 ]
