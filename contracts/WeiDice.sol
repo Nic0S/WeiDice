@@ -37,8 +37,13 @@ contract WeiDice is Admin {
         uint targetBlock = rolls[msg.sender].block + blockDelay - 1;
         require(targetBlock < block.number, "Roll still in progress");
 
+        // Only the block hash of the most recent 256 blocks is available. If the reward is not
+        // collected before then we must always consider the wager lost to prevent attacks
+        // that depend on a zero blockhash to exploit the RNG.
+        bool expired = block.number - targetBlock >= 256;
+
         uint rand = randMod(100, targetBlock);
-        if (rand < winProbability) {
+        if (rand < winProbability && !expired) {
             uint winnings = rolls[msg.sender].wager * 2;
             bool sent = msg.sender.send(winnings);
             require(sent, "Failed to send winnings");
